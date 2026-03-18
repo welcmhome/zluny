@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useMemo, useRef, useState } from "react";
 
 const terms = [
   {
@@ -108,6 +108,8 @@ const terms = [
 export default function DictionaryPage() {
   const alphabet = "ABCDEFGHIJKLMNOPQRSTUVWXYZ".split("");
   const [search, setSearch] = useState("");
+  const [activeLetter, setActiveLetter] = useState<string | null>(null);
+  const scrubberRef = useRef<HTMLDivElement | null>(null);
 
   const visibleTerms = useMemo(() => {
     const q = search.trim().toLowerCase();
@@ -122,8 +124,25 @@ export default function DictionaryPage() {
       .sort((a, b) => a.term.localeCompare(b.term));
   }, [search]);
 
+  const handleTouch = (e: React.TouchEvent) => {
+    e.preventDefault();
+    const touch = e.touches[0];
+    const rect = scrubberRef.current?.getBoundingClientRect();
+    if (!rect) return;
+    const relativeY = touch.clientY - rect.top;
+    const letterHeight = rect.height / alphabet.length;
+    const index = Math.max(
+      0,
+      Math.min(alphabet.length - 1, Math.floor(relativeY / letterHeight)),
+    );
+    const letter = alphabet[index];
+    setActiveLetter(letter);
+    const el = document.getElementById(`letter-${letter}`);
+    el?.scrollIntoView({ behavior: "smooth", block: "start" });
+  };
+
   return (
-    <div className="space-y-6 md:pr-0 pr-8">
+    <div className="space-y-6 md:pl-0 pl-8">
       <header className="border-b border-black pb-4">
         <h1 className="font-pixel text-2xl mb-2">DICTIONARY</h1>
         <p className="font-mono text-sm">AI terms explained simply.</p>
@@ -169,7 +188,14 @@ export default function DictionaryPage() {
         </div>
 
         {/* Mobile side scrubber (A–Z) */}
-        <div className="md:hidden fixed right-2 top-1/2 -translate-y-1/2 z-20 flex flex-col items-center gap-1">
+        <div
+          ref={scrubberRef}
+          onTouchStart={handleTouch}
+          onTouchMove={handleTouch}
+          onTouchEnd={() => setTimeout(() => setActiveLetter(null), 600)}
+          style={{ touchAction: "none" }}
+          className="md:hidden fixed left-2 top-1/2 -translate-y-1/2 z-20 flex flex-col items-center gap-1"
+        >
           {alphabet.map((letter) => {
             const hasAny = terms.some(
               (t) => t.term[0].toUpperCase() === letter,
@@ -188,7 +214,25 @@ export default function DictionaryPage() {
               <button
                 key={letter}
                 type="button"
-                className="font-mono text-[10px] leading-none"
+                style={{
+                  fontFamily: "monospace",
+                  fontSize: activeLetter === letter ? "14px" : "10px",
+                  fontWeight: activeLetter === letter ? "bold" : "normal",
+                  transform:
+                    activeLetter === letter
+                      ? "scale(1.6) translateX(4px)"
+                      : "scale(1)",
+                  transition: "transform 0.1s ease, font-size 0.1s ease",
+                  lineHeight: 1,
+                  display: "block",
+                  color: "#000",
+                  background: "none",
+                  border: "none",
+                  padding: "1px 0",
+                  cursor: "pointer",
+                  minWidth: "20px",
+                  textAlign: "center",
+                }}
                 onClick={() => {
                   const el = document.getElementById(`letter-${letter}`);
                   el?.scrollIntoView({ behavior: "smooth", block: "start" });

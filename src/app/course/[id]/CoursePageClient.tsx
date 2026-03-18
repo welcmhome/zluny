@@ -1,7 +1,7 @@
 "use client";
 
-import { useState, useEffect, useCallback, useMemo } from "react";
-import { useRouter } from "next/navigation";
+import { useState, useEffect, useCallback, useMemo, useRef } from "react";
+import { useRouter, usePathname } from "next/navigation";
 import Link from "next/link";
 import ReactMarkdown from "react-markdown";
 import ReportButton from "@/components/ReportButton";
@@ -66,6 +66,16 @@ export default function CoursePageClient({
   const [audioProgress, setAudioProgress] = useState(0);
   const [audioChunkIndex, setAudioChunkIndex] = useState(0);
   const chunksRef = useState<string[]>([])[0];
+  const [isPlaying, setIsPlaying] = useState(false);
+  const [isPaused, setIsPaused] = useState(false);
+  const [elapsed, setElapsed] = useState(0);
+  const [estimatedSeconds, setEstimatedSeconds] = useState(0);
+  const [playbackRate, setPlaybackRate] = useState(1);
+  const [wordsArray, setWordsArray] = useState<string[]>([]);
+  const intervalRef = useRef<NodeJS.Timeout | null>(null);
+  const pausedWordIndexRef = useRef<number>(0);
+  const utteranceRef = useRef<SpeechSynthesisUtterance | null>(null);
+  const pathname = usePathname();
   const [showMobileToc, setShowMobileToc] = useState(false);
 
   // The first two parsed sections are intro / table of contents.
@@ -90,14 +100,24 @@ export default function CoursePageClient({
     markSectionRead(currentSection);
   }, [currentSection, markSectionRead]);
 
-  // Stop audio when changing sections (matches old reader behavior)
+  // Stop audio when changing sections
   useEffect(() => {
-    if (typeof window !== "undefined") window.speechSynthesis?.cancel();
+    if (typeof window !== "undefined") {
+      window.speechSynthesis?.cancel();
+    }
+    if (intervalRef.current) {
+      clearInterval(intervalRef.current);
+      intervalRef.current = null;
+    }
     setAudioSection(null);
     setAudioPlaying(false);
     setAudioPaused(false);
     setAudioProgress(0);
     setAudioChunkIndex(0);
+    setIsPlaying(false);
+    setIsPaused(false);
+    setElapsed(0);
+    setEstimatedSeconds(0);
   }, [currentSection]);
 
   function handleSave(e: React.MouseEvent) {
@@ -146,67 +166,84 @@ export default function CoursePageClient({
     return out.length ? out : [""];
   }
 
-  function playSectionFromChunk(sectionIndex: number, startChunk: number) {
+  function clearIntervalTimer() {
+    if (intervalRef.current) {
+      clearInterval(intervalRef.current);
+      intervalRef.current = null;
+    }
+  }
+
+  function startIntervalTimer(total: number) {
+    clearIntervalTimer();
+    intervalRef.current = setInterval(() => {
+      setElapsed((prev) => Math.min(prev + 0.25, total));
+    }, 250);
+  }
+
+  function playSection(sectionIndex: number) {
     if (typeof window === "undefined" || !window.speechSynthesis) return;
     const section = effectiveSections[sectionIndex];
     if (!section?.body) return;
 
     window.speechSynthesis.cancel();
+    clearIntervalTimer();
 
-    const chunks = chunkText(section.body, WORDS_PER_CHUNK);
-    chunksRef.length = 0;
-    chunksRef.push(...chunks);
+    const words = section.body.trim().split(/\s+/).filter(Boolean);
+    const totalSeconds = Math.max(1, Math.ceil(words.length / 3));
+    setWordsArray(words);
+    setEstimatedSeconds(totalSeconds);
+    setElapsed(0);
 
-    const safeStart = Math.min(Math.max(startChunk, 0), chunks.length - 1);
-    setAudioSection(sectionIndex);
-    setAudioChunkIndex(safeStart);
-    setAudioProgress(
-      chunks.length ? (safeStart / chunks.length) * 100 : 0,
-    );
-    setAudioPlaying(true);
-    setAudioPaused(false);
-
-    let chunkIdx = safeStart;
-    const speakNext = () => {
-      if (chunkIdx >= chunks.length) {
-        setAudioPlaying(false);
-        setAudioSection(null);
-        setAudioProgress(100);
-        return;
-      }
-      const u = new SpeechSynthesisUtterance(chunks[chunkIdx]);
-      u.rate = audioSpeed;
-      u.onend = () => {
-        chunkIdx += 1;
-        setAudioChunkIndex(chunkIdx);
-        setAudioProgress(
-          chunks.length ? (chunkIdx / chunks.length) * 100 : 100,
-        );
-        if (chunkIdx < chunks.length) speakNext();
-        else {
-          setAudioPlaying(false);
-          setAudioSection(null);
-        }
-      };
-      window.speechSynthesis.speak(u);
+    const u = new SpeechSynthesisUtterance(section.body);
+    u.rate = playbackRate;
+    u.onend = () => {
+      setIsPlaying(false);
+      setIsPaused(false);
+      setElapsed(totalSeconds);
+      clearIntervalTimer();
     };
-    speakNext();
-  }
+    utteranceRef.current = u;
 
-  function playSection(sectionIndex: number) {
-    playSectionFromChunk(sectionIndex, 0);
+    window.speechSynthesis.speak(u);
+    setAudioSection(sectionIndex);
+    setIsPlaying(true);
+    setIsPaused(false);
+    startIntervalTimer(totalSeconds);
   }
 
   function pauseAudio() {
     if (typeof window === "undefined") return;
-    window.speechSynthesis.pause();
+    // iOS Safari does not reliably support speechSynthesis.pause().
+    // Workaround: cancel speech and remember approximate word position to resume.
+    window.speechSynthesis.cancel();
+    clearIntervalTimer();
+    const pct = estimatedSeconds > 0 ? elapsed / estimatedSeconds : 0;
+    pausedWordIndexRef.current = Math.floor(pct * wordsArray.length);
+    setIsPaused(true);
+    setIsPlaying(false);
     setAudioPaused(true);
   }
 
   function resumeAudio() {
     if (typeof window === "undefined") return;
-    window.speechSynthesis.resume();
+    const idx = pausedWordIndexRef.current ?? 0;
+    const remaining = wordsArray.slice(idx).join(" ");
+    window.speechSynthesis.cancel();
+    clearIntervalTimer();
+    const u = new SpeechSynthesisUtterance(remaining);
+    u.rate = playbackRate;
+    u.onend = () => {
+      setIsPlaying(false);
+      setIsPaused(false);
+      setElapsed(estimatedSeconds);
+      clearIntervalTimer();
+    };
+    utteranceRef.current = u;
+    window.speechSynthesis.speak(u);
     setAudioPaused(false);
+    setIsPlaying(true);
+    setIsPaused(false);
+    startIntervalTimer(estimatedSeconds);
   }
 
   function stopAudio() {
@@ -215,13 +252,40 @@ export default function CoursePageClient({
     setAudioPlaying(false);
     setAudioSection(null);
     setAudioPaused(false);
+    setIsPlaying(false);
+    setIsPaused(false);
+    clearIntervalTimer();
   }
 
   function setSpeed(s: number) {
-    // Update desired speed; new value is applied for the *next* chunk.
-    // We deliberately do NOT cancel/restart the whole section so playback
-    // continues from the current position.
-    setAudioSpeed(s);
+    setPlaybackRate(s);
+    if (typeof window === "undefined" || !window.speechSynthesis) return;
+    if (!isPlaying && !isPaused) return;
+
+    window.speechSynthesis.cancel();
+    clearIntervalTimer();
+
+    if (!wordsArray.length || estimatedSeconds <= 0) return;
+
+    const pct = elapsed / estimatedSeconds;
+    const wordIndex = Math.max(
+      0,
+      Math.min(wordsArray.length - 1, Math.floor(pct * wordsArray.length)),
+    );
+    const remaining = wordsArray.slice(wordIndex).join(" ");
+    const u = new SpeechSynthesisUtterance(remaining);
+    u.rate = s;
+    u.onend = () => {
+      setIsPlaying(false);
+      setIsPaused(false);
+      setElapsed(estimatedSeconds);
+      clearIntervalTimer();
+    };
+    utteranceRef.current = u;
+    window.speechSynthesis.speak(u);
+    setIsPlaying(true);
+    setIsPaused(false);
+    startIntervalTimer(estimatedSeconds);
   }
 
   async function submitQuiz() {
@@ -251,6 +315,29 @@ export default function CoursePageClient({
   const isAudioThisSection = audioSection === currentSection;
   const percent =
     totalNavSections > 0 ? Math.round(((currentSection + 1) / totalNavSections) * 100) : 0;
+  const playbackProgress =
+    estimatedSeconds > 0 ? Math.min(100, (elapsed / estimatedSeconds) * 100) : 0;
+  const formatTime = (s: number) =>
+    `${Math.floor(s / 60)}:${String(Math.floor(s % 60)).padStart(2, "0")}`;
+
+  // Cancel speech on route change / unmount
+  useEffect(() => {
+    return () => {
+      if (typeof window !== "undefined") {
+        window.speechSynthesis.cancel();
+      }
+      clearIntervalTimer();
+    };
+  }, []);
+
+  useEffect(() => {
+    if (typeof window !== "undefined") {
+      window.speechSynthesis.cancel();
+    }
+    clearIntervalTimer();
+    setIsPlaying(false);
+    setIsPaused(false);
+  }, [pathname]);
 
   return (
     <div className="max-w-5xl mx-auto space-y-4">
@@ -311,8 +398,8 @@ export default function CoursePageClient({
           </div>
         </div>
 
-        {/* Two-column layout: sections list + reader */}
-        <div className="flex gap-4">
+        {/* Two-column layout: sections list + reader (stacks on mobile) */}
+        <div className="flex flex-col md:flex-row gap-4">
           {/* Sections sidebar (numbers only: Section 1, 2, ...; intro/contents removed in effectiveSections) */}
           <aside className="w-56 p-3 font-mono text-xs hidden md:block border-r border-black">
             <h2 className="font-pixel text-sm mb-2">Sections</h2>
@@ -507,18 +594,109 @@ export default function CoursePageClient({
                 ) : (
                   section && (
                     <>
-                      <button
-                        type="button"
-                        onClick={() => {
-                          if (isAudioThisSection && audioPlaying) stopAudio();
-                          else playSection(currentSection);
-                        }}
-                        className="font-mono text-sm underline min-h-[44px]"
-                      >
-                        {isAudioThisSection && audioPlaying
-                          ? "⏹ STOP"
-                          : "▶ LISTEN TO SECTION"}
-                      </button>
+                      {/* Audio player */}
+                      <div className="w-full max-w-lg mb-4">
+                        {!isPlaying && elapsed === 0 ? (
+                          <button
+                            type="button"
+                            onClick={() => playSection(currentSection)}
+                            className="w-full border border-black px-3 py-3 font-pixel text-[11px] flex items-center justify-center min-h-[48px]"
+                          >
+                            ▶ LISTEN TO SECTION {currentSection + 1}
+                          </button>
+                        ) : (
+                          <div className="border border-black bg-white">
+                            <div className="flex items-center justify-between px-3 py-2 border-b border-black">
+                              <button
+                                type="button"
+                                onClick={() => {
+                                  if (isPlaying && !isPaused) {
+                                    pauseAudio();
+                                  } else if (isPaused) {
+                                    resumeAudio();
+                                  } else {
+                                    playSection(currentSection);
+                                  }
+                                }}
+                                className="font-pixel text-[11px] min-h-[48px] px-2"
+                              >
+                                {isPlaying && !isPaused
+                                  ? "⏸ PAUSE"
+                                  : isPaused
+                                  ? "▶ RESUME"
+                                  : "▶ LISTEN"}
+                              </button>
+                              <span className="font-mono text-xs">
+                                {playbackRate.toFixed(2).replace(/\.00$/, "")}x
+                              </span>
+                            </div>
+
+                            {/* Progress bar */}
+                            <div className="px-3 py-2 border-b border-black">
+                              <div
+                                className="w-full h-3 border border-black bg-white cursor-pointer relative"
+                                onClick={(e) => {
+                                  if (!wordsArray.length || estimatedSeconds <= 0) return;
+                                  if (typeof window === "undefined" || !window.speechSynthesis) return;
+                                  const rect = e.currentTarget.getBoundingClientRect();
+                                  const pct = (e.clientX - rect.left) / rect.width;
+                                  const clamped = Math.max(0, Math.min(1, pct));
+                                  const newTime = clamped * estimatedSeconds;
+                                  const wordIndex = Math.max(
+                                    0,
+                                    Math.min(
+                                      wordsArray.length - 1,
+                                      Math.floor(clamped * wordsArray.length),
+                                    ),
+                                  );
+                                  const remainingText = wordsArray.slice(wordIndex).join(" ");
+                                  window.speechSynthesis.cancel();
+                                  clearIntervalTimer();
+                                  const u = new SpeechSynthesisUtterance(remainingText);
+                                  u.rate = playbackRate;
+                                  u.onend = () => {
+                                    setIsPlaying(false);
+                                    setIsPaused(false);
+                                    setElapsed(estimatedSeconds);
+                                    clearIntervalTimer();
+                                  };
+                                  utteranceRef.current = u;
+                                  window.speechSynthesis.speak(u);
+                                  setElapsed(newTime);
+                                  setIsPlaying(true);
+                                  setIsPaused(false);
+                                  startIntervalTimer(estimatedSeconds);
+                                }}
+                              >
+                                <div
+                                  className="h-full bg-black"
+                                  style={{ width: `${playbackProgress}%` }}
+                                />
+                              </div>
+                              <div className="mt-1 flex justify-between font-mono text-xs">
+                                <span>{formatTime(elapsed)}</span>
+                                <span>{formatTime(estimatedSeconds)}</span>
+                              </div>
+                            </div>
+
+                            {/* Speed controls */}
+                            <div className="px-3 py-2 flex gap-2">
+                              {[0.75, 1, 1.25, 1.5].map((rate) => (
+                                <button
+                                  key={rate}
+                                  type="button"
+                                  onClick={() => setSpeed(rate)}
+                                  className={`font-mono text-xs border border-black px-2 py-1 min-w-[40px] min-h-[36px] ${
+                                    playbackRate === rate ? "btn-selected" : "btn-plain"
+                                  }`}
+                                >
+                                  {rate}x
+                                </button>
+                              ))}
+                            </div>
+                          </div>
+                        )}
+                      </div>
 
                       <div className="course-lesson-body font-mono text-sm prose prose-sm max-w-none">
                         <ReactMarkdown>{section.body}</ReactMarkdown>
