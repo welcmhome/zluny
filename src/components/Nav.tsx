@@ -69,7 +69,7 @@ export default function Nav() {
               priority
             />
           </Link>
-          <span className="font-mono text-[11px] text-gray-500">
+          <span className="hidden sm:inline font-mono text-[11px] text-gray-500">
             | AI for all.
           </span>
         </div>
