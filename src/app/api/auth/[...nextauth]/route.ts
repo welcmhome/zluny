@@ -3,10 +3,7 @@ import Credentials from "next-auth/providers/credentials";
 import bcrypt from "bcrypt";
 import { db } from "@/lib/db";
 
-export const {
-  auth,
-  handlers: { GET, POST },
-} = NextAuth({
+const authSetup = NextAuth({
   providers: [
     Credentials({
       name: "Credentials",
@@ -53,4 +50,8 @@ export const {
     },
   },
 });
+
+export const {
+  handlers: { GET, POST },
+} = authSetup;
 
