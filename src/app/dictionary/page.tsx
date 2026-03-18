@@ -221,19 +221,20 @@ export default function DictionaryPage() {
               {visibleTerms.map(({ term, definition, related }) => {
                 const letterId = term[0]?.toUpperCase() || "";
                 return (
-                <article
-                  key={term}
-                  id={letterId ? `letter-${letterId}` : undefined}
-                  className="font-mono text-sm border-b border-black pb-2"
-                >
-                  <h2 className="font-bold text-sm mb-1">{term}</h2>
-                  <p className="text-sm">{definition}</p>
-                  {related && related.length > 0 && (
-                    <p className="mt-1 text-gray-500 text-[11px]">
-                      Related: {related.join(", ")}
-                    </p>
-                  )}
-                </article>
+                  <article
+                    key={term}
+                    id={letterId ? `letter-${letterId}` : undefined}
+                    className="font-mono text-sm border-b border-black pb-2"
+                  >
+                    <h2 className="font-bold text-sm mb-1">{term}</h2>
+                    <p className="text-sm">{definition}</p>
+                    {related && related.length > 0 && (
+                      <p className="mt-1 text-gray-500 text-[11px]">
+                        Related: {related.join(", ")}
+                      </p>
+                    )}
+                  </article>
+                );
               })}
             </div>
           )}
