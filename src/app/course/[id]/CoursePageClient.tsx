@@ -732,7 +732,7 @@ export default function CoursePageClient({
                   Next
                 </button>
               </div>
-              <div className="font-mono text-xs text-gray-500 max-md:w-full max-md:text-right mt-2">
+              <div className="font-mono text-xs text-gray-500 max-md:w-full max-md:text-left mt-2">
                 Is something wrong?{" "}
                 <ReportButton
                   contentType="course"
