@@ -1,0 +1,118 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@import url("https://fonts.googleapis.com/css2?family=Press+Start+2P&family=Space+Mono:wght@400;700&display=swap");
+
+html,
+body {
+  min-height: 100%;
+}
+
+body {
+  background: #ffffff;
+  color: #000000;
+}
+
+/* Font utility classes matching the pixel / mono design (use Next.js font vars) */
+.font-pixel {
+  font-family: var(--font-pixel);
+}
+
+.font-mono {
+  font-family: var(--font-mono);
+}
+
+a {
+  color: inherit;
+  text-decoration: none;
+}
+
+a:hover {
+  text-decoration: underline;
+}
+
+/* Plain rectangular buttons with black borders */
+.btn-plain {
+  border-width: 1px;
+  border-color: #000000;
+  background: #ffffff;
+  color: #000000;
+}
+
+.btn-plain:hover,
+.btn-plain:active {
+  background: #000000;
+  color: #ffffff !important;
+}
+
+/* Selected state that stays black/white */
+.btn-selected {
+  background: #000000 !important;
+  color: #ffffff !important;
+}
+
+/* Course lesson body typography */
+.course-lesson-body p {
+  margin-bottom: 1rem;
+  line-height: 1.7;
+}
+
+.course-lesson-body h2 {
+  font-family: "Press Start 2P", system-ui, -apple-system, BlinkMacSystemFont,
+    "Segoe UI", sans-serif;
+  font-size: 0.9rem;
+  margin-top: 2.25rem;
+  margin-bottom: 0.9rem;
+}
+
+.course-lesson-body h3 {
+  font-family: "Space Mono", ui-monospace, SFMono-Regular, Menlo, Monaco,
+    Consolas, "Liberation Mono", "Courier New", monospace;
+  font-size: 0.85rem;
+  margin-top: 1.5rem;
+  margin-bottom: 0.75rem;
+}
+
+.course-lesson-body ul,
+.course-lesson-body ol {
+  margin-left: 1.25rem;
+  margin-bottom: 1rem;
+}
+
+.course-lesson-body li {
+  margin-bottom: 0.5rem;
+}
+
+/* Clipboard / Copy Library code block styling */
+.clipboard-code {
+  font-family: "Space Mono", ui-monospace, SFMono-Regular, Menlo, Monaco,
+    Consolas, "Liberation Mono", "Courier New", monospace;
+  font-size: 0.75rem;
+  background: #f9fafb;
+  border: 1px solid #000000;
+  padding: 0.75rem 0.9rem;
+  white-space: pre-wrap;
+}
+
+/* Category background colors */
+.category-ai-workflows { background-color: #dcfce7; }
+.category-ai-agents { background-color: #e0f2fe; }
+.category-business { background-color: #fef3c7; }
+.category-research { background-color: #f5f5f5; }
+.category-entrepreneurship { background-color: #fee2e2; }
+.category-coding { background-color: #e5e7eb; }
+.category-content { background-color: #fce7f3; }
+.category-data { background-color: #ede9fe; }
+
+/* Difficulty colors (text and border) */
+.difficulty-beginner { color: #16a34a; border-color: #16a34a; }
+.difficulty-intermediate { color: #f97316; border-color: #f97316; }
+.difficulty-advanced { color: #ef4444; border-color: #ef4444; }
+
+/* Page frame: main content area is held in by layout borders; ensure typography */
+main {
+  font-family: "Space Mono", ui-monospace, SFMono-Regular, Menlo, Monaco,
+    Consolas, "Liberation Mono", "Courier New", monospace;
+}
+
