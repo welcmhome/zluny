@@ -1,6 +1,6 @@
 "use client";
 
-import React from "react";
+import React, { useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useSession, signOut } from "next-auth/react";
@@ -31,6 +31,18 @@ export default function Nav() {
   const { data: session } = useSession();
   const pathname = usePathname();
 
+  const [hideBottomBar, setHideBottomBar] = useState(false);
+  const [hideHeaderBar, setHideHeaderBar] = useState(false);
+
+  const lastScrollYRef = useRef(0);
+  const downAccumBottomRef = useRef(0);
+  const downAccumHeaderRef = useRef(0);
+  const upAccumBottomRef = useRef(0);
+  const hasEnoughScrollRef = useRef(false);
+  const isMobileRef = useRef(false);
+  const hideBottomRef = useRef(false);
+  const hideHeaderRef = useRef(false);
+
   const username =
     (session?.user?.name as string | null) ?? session?.user?.email ?? null;
 
@@ -47,11 +59,101 @@ export default function Nav() {
     { href: "/about", label: "About", isActive: pathname === "/about" },
   ];
 
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+
+    const isMobile = window.innerWidth < 768;
+    isMobileRef.current = isMobile;
+    lastScrollYRef.current = window.scrollY || 0;
+
+    if (!isMobile) return;
+
+    const onScroll = (e: Event) => {
+      if (!isMobileRef.current) return;
+
+      const target = e.target as any;
+      const currentY =
+        typeof target?.scrollTop === "number" ? target.scrollTop : window.scrollY || 0;
+      const scrollHeight =
+        typeof target?.scrollHeight === "number"
+          ? target.scrollHeight
+          : document.documentElement.scrollHeight;
+      const clientHeight =
+        typeof target?.clientHeight === "number" ? target.clientHeight : window.innerHeight;
+      const hasEnough = scrollHeight - clientHeight > 300;
+
+      // If there's not enough scroll, keep everything visible.
+      if (!hasEnough) {
+        downAccumBottomRef.current = 0;
+        downAccumHeaderRef.current = 0;
+        upAccumBottomRef.current = 0;
+        hideBottomRef.current = false;
+        hideHeaderRef.current = false;
+        setHideBottomBar(false);
+        setHideHeaderBar(false);
+        lastScrollYRef.current = currentY;
+        return;
+      }
+
+      const delta = currentY - lastScrollYRef.current;
+      lastScrollYRef.current = currentY;
+
+      // Reappear immediately on any upward scroll.
+      if (delta < 0) {
+        downAccumBottomRef.current = 0;
+        downAccumHeaderRef.current = 0;
+        // Require a tiny upward distance before showing again,
+        // to prevent flicker from micro scroll jitter.
+        upAccumBottomRef.current += Math.abs(delta);
+
+        if (hideBottomRef.current) {
+          if (upAccumBottomRef.current >= 10) {
+            hideBottomRef.current = false;
+            setHideBottomBar(false);
+          }
+        }
+        // For the header, always show on upward scroll.
+        // This prevents any chance of header state/ref mismatch.
+        hideHeaderRef.current = false;
+        setHideHeaderBar(false);
+        return;
+      }
+
+      // Accumulate downward distance so we don't hide immediately.
+      if (delta > 0) {
+        upAccumBottomRef.current = 0;
+        downAccumBottomRef.current += delta;
+        downAccumHeaderRef.current += delta;
+
+        if (!hideBottomRef.current && downAccumBottomRef.current >= 80) {
+          hideBottomRef.current = true;
+          setHideBottomBar(true);
+        }
+        if (!hideHeaderRef.current && downAccumHeaderRef.current >= 120) {
+          hideHeaderRef.current = true;
+          setHideHeaderBar(true);
+        }
+      }
+    };
+
+    // Capture so nested scroll containers on iOS still trigger updates.
+    document.addEventListener("scroll", onScroll, true);
+    return () => document.removeEventListener("scroll", onScroll, true);
+  }, []);
+
+  const headerMaxHeightClass = hideHeaderBar
+    ? "max-h-0"
+    : "max-h-[calc(env(safe-area-inset-top,0px)+48px)]";
+
   return (
     <>
       <header
-        className="border-b border-black bg-white h-[calc(env(safe-area-inset-top,0px)+48px)] md:h-auto md:min-h-[calc(env(safe-area-inset-top,0px)+56px)]"
-        style={{ paddingTop: "env(safe-area-inset-top, 0px)" }}
+        className={`border-b-0 md:border-b border-black bg-white h-[calc(env(safe-area-inset-top,0px)+48px)] md:h-auto md:min-h-[calc(env(safe-area-inset-top,0px)+56px)] md:max-h-none overflow-hidden ${headerMaxHeightClass}`}
+        style={{
+          paddingTop: "env(safe-area-inset-top, 0px)",
+          transform: hideHeaderBar ? "translateY(-100%)" : "translateY(0%)",
+          transition: "transform 0.25s ease, max-height 0.25s ease",
+        }}
       >
         <div className="w-full flex items-center justify-between px-4 py-0 md:max-w-5xl md:mx-auto md:py-3">
           <div className="flex items-center gap-3 pr-4">
@@ -152,7 +254,12 @@ export default function Nav() {
       </header>
       <nav
         className="fixed bottom-0 left-0 right-0 border-t border-black bg-white z-50 flex flex-row md:hidden"
-        style={{ paddingBottom: "env(safe-area-inset-bottom, 0px)" }}
+        style={{
+          paddingBottom: "env(safe-area-inset-bottom, 0px)",
+          transform: hideBottomBar ? "translateY(100%)" : "translateY(0%)",
+          transition: "transform 0.25s ease",
+          pointerEvents: hideBottomBar ? "none" : "auto",
+        }}
       >
         <Link
           href="/"
