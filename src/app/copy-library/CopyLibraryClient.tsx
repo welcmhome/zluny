@@ -68,7 +68,7 @@ export default function CopyLibraryClient({ initialResources }: Props) {
             key={cat}
             type="button"
             onClick={() => setCategory(cat)}
-            className={`font-mono text-xs border border-black px-2 py-1 btn-plain ${
+            className={`font-mono text-sm border border-black px-2 py-1 btn-plain ${
               category === cat ? "btn-selected" : ""
             }`}
           >
@@ -105,13 +105,12 @@ export default function CopyLibraryClient({ initialResources }: Props) {
                   {r.category}
                 </span>
                 <span className="ml-2 text-[11px]">{r.works_with}</span>
-                <p className="mt-1 text-[11px] text-gray-700 line-clamp-2">
-                  {r.description.slice(0, 100)}
-                  {r.description.length > 100 ? "..." : ""}
+                <p className="mt-1 text-sm text-gray-700 line-clamp-3">
+                  {r.description}
                 </p>
                 {/* Snippet preview area with copy icon */}
                 <div className="mt-2 border border-gray-400 bg-gray-100 px-2 py-2 relative">
-                  <div className="pr-6 text-[11px] whitespace-pre-wrap max-h-40 overflow-hidden">
+                  <div className="pr-6 text-sm whitespace-pre-wrap max-h-40 overflow-hidden">
                     {r.content}
                   </div>
                   <button

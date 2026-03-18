@@ -1,3 +1,7 @@
+"use client";
+
+import { useMemo, useState } from "react";
+
 const terms = [
   {
     term: "AI Agent",
@@ -103,66 +107,109 @@ const terms = [
 
 export default function DictionaryPage() {
   const alphabet = "ABCDEFGHIJKLMNOPQRSTUVWXYZ".split("");
+  const [activeLetter, setActiveLetter] = useState<string | null>(null);
+  const [search, setSearch] = useState("");
 
-  const termsByLetter: Record<string, typeof terms> = {};
-  terms.forEach((t) => {
-    const letter = t.term[0].toUpperCase();
-    if (!termsByLetter[letter]) termsByLetter[letter] = [];
-    termsByLetter[letter].push(t);
-  });
+  const visibleTerms = useMemo(() => {
+    const q = search.trim().toLowerCase();
+    return terms
+      .filter((t) => {
+        if (activeLetter && t.term[0].toUpperCase() !== activeLetter) return false;
+        if (!q) return true;
+        return (
+          t.term.toLowerCase().includes(q) ||
+          t.definition.toLowerCase().includes(q)
+        );
+      })
+      .sort((a, b) => a.term.localeCompare(b.term));
+  }, [activeLetter, search]);
 
   return (
     <div className="space-y-6">
       <header className="border-b border-black pb-4">
         <h1 className="font-pixel text-2xl mb-2">DICTIONARY</h1>
-        <p className="font-mono text-xs">AI terms explained simply.</p>
+        <p className="font-mono text-sm">AI terms explained simply.</p>
       </header>
 
-      <nav className="flex flex-wrap gap-1 border-b border-black pb-4">
-        {alphabet.map((letter) =>
-          termsByLetter[letter] ? (
-            <a
-              key={letter}
-              href={`#letter-${letter}`}
-              className="font-mono text-xs border border-black px-2 py-0.5 hover:bg-black hover:text-white"
-            >
-              {letter}
-            </a>
-          ) : (
-            <span
-              key={letter}
-              className="font-mono text-xs px-2 py-0.5 text-gray-400"
-            >
-              {letter}
-            </span>
-          )
-        )}
-      </nav>
+      {/* Filters + results layout */}
+      <section className="flex flex-col md:flex-row md:items-start gap-4">
+        {/* Letter filter column (left) */}
+        <div className="md:w-32 md:border-r md:border-black pr-2 md:pr-4 mb-2 md:mb-0">
+          <p className="font-mono text-[11px] mb-2">Letters</p>
+          <div className="flex md:flex-col flex-wrap gap-1">
+            {alphabet.map((letter) => {
+              const isActive = activeLetter === letter;
+              const hasAny = terms.some(
+                (t) => t.term[0].toUpperCase() === letter,
+              );
 
-      <div className="space-y-8">
-        {Object.entries(termsByLetter)
-          .sort(([a], [b]) => a.localeCompare(b))
-          .map(([letter, letterTerms]) => (
-            <section key={letter} id={`letter-${letter}`}>
-              <h2 className="font-pixel text-sm border-b border-black pb-1 mb-3">
-                {letter}
-              </h2>
-              <dl className="space-y-4">
-                {letterTerms.map(({ term, definition, related }) => (
-                  <div key={term} className="font-mono text-xs">
-                    <dt className="font-bold">{term}</dt>
-                    <dd className="mt-1">{definition}</dd>
-                    {related && related.length > 0 && (
-                      <dd className="mt-1 text-gray-500">
-                        Related: {related.join(", ")}
-                      </dd>
-                    )}
-                  </div>
-                ))}
-              </dl>
-            </section>
-          ))}
-      </div>
+              if (!hasAny) {
+                return (
+                  <span
+                    key={letter}
+                    className="font-mono text-[11px] px-1 text-gray-300"
+                  >
+                    {letter}
+                  </span>
+                );
+              }
+
+              return (
+                <button
+                  key={letter}
+                  type="button"
+                  onClick={() =>
+                    setActiveLetter((prev) => (prev === letter ? null : letter))
+                  }
+                  className={`font-mono text-sm px-1 text-left ${
+                    isActive
+                      ? "font-bold underline"
+                      : "hover:underline"
+                  }`}
+                >
+                  {letter}
+                </button>
+              );
+            })}
+          </div>
+        </div>
+
+        {/* Search + list (right) */}
+        <div className="flex-1 space-y-3">
+          <div>
+            <input
+              type="text"
+              placeholder="Search by term or definition..."
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+              className="w-full max-w-md font-mono text-sm border border-black px-2 py-1 bg-white text-black"
+            />
+          </div>
+
+          {visibleTerms.length === 0 ? (
+            <p className="font-mono text-sm">
+              NO MATCHES. TRY A DIFFERENT TERM.
+            </p>
+          ) : (
+            <div className="space-y-3">
+              {visibleTerms.map(({ term, definition, related }) => (
+                <article
+                  key={term}
+                  className="font-mono text-sm border-b border-black pb-2"
+                >
+                  <h2 className="font-bold text-sm mb-1">{term}</h2>
+                  <p className="text-sm">{definition}</p>
+                  {related && related.length > 0 && (
+                    <p className="mt-1 text-gray-500 text-[11px]">
+                      Related: {related.join(", ")}
+                    </p>
+                  )}
+                </article>
+              ))}
+            </div>
+          )}
+        </div>
+      </section>
     </div>
   );
 }

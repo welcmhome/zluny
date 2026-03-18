@@ -145,7 +145,7 @@ export default async function CoursesPage({
   return (
     <div className="space-y-6">
       <header className="border-b border-black pb-4">
-        <h1 className="font-pixel text-xl mb-1">COURSES</h1>
+        <h1 className="font-pixel text-2xl mb-1">COURSES</h1>
         <p className="font-mono text-xs">
           Daily AI mini-courses and lessons.
         </p>

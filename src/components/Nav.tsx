@@ -52,7 +52,7 @@ export default function Nav() {
     <header className="border-b border-black">
       <div className="max-w-5xl mx-auto flex items-center justify-between px-4 py-3">
         <div className="flex items-center gap-3 pr-4">
-          <Link href="/" className="flex items-center gap-2">
+          <Link href="/" className="flex items-center gap-2 no-underline">
             <span className="font-pixel text-lg uppercase">ZLUNY</span>
             <Image
               src="/zluny_caterpillar_transparent.png"

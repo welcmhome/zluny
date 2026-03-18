@@ -68,8 +68,8 @@ export default async function CopyLibraryDetailPage({ params }: Props) {
           </span>
         </div>
       </header>
-      <p className="font-mono text-xs">{resource.description}</p>
-      <div className="clipboard-code font-mono text-xs whitespace-pre-wrap">
+      <p className="font-mono text-sm">{resource.description}</p>
+      <div className="clipboard-code font-mono text-sm whitespace-pre-wrap">
         {resource.content}
       </div>
       <div className="flex items-center justify-between gap-2 pt-2">

@@ -475,7 +475,7 @@ export default function CoursePageClient({
                           : "▶ LISTEN TO SECTION"}
                       </button>
 
-                      <div className="course-lesson-body font-mono text-xs prose prose-sm max-w-none">
+                      <div className="course-lesson-body font-mono text-sm prose prose-sm max-w-none">
                         <ReactMarkdown>{section.body}</ReactMarkdown>
                       </div>
                     </>
@@ -492,7 +492,7 @@ export default function CoursePageClient({
                   onClick={() =>
                     setCurrentSection((prev) => Math.max(0, prev - 1))
                   }
-                  className="border border-black px-3 py-1 bg-white text-black font-mono text-xs"
+                  className="border border-black px-3 py-1 bg-white text-black font-mono text-sm"
                 >
                   Previous
                 </button>
@@ -505,7 +505,7 @@ export default function CoursePageClient({
                       return next;
                     })
                   }
-                  className="border border-black px-3 py-1 bg-black text-white font-mono text-xs"
+                  className="border border-black px-3 py-1 bg-black text-white font-mono text-sm"
                 >
                   Next
                 </button>
