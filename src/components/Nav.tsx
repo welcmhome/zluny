@@ -49,7 +49,13 @@ export default function Nav() {
   ];
 
   return (
-    <header className="border-b border-black">
+    <header
+      className="border-b border-black"
+      style={{
+        paddingTop: "env(safe-area-inset-top, 0px)",
+        minHeight: "calc(env(safe-area-inset-top, 0px) + 56px)",
+      }}
+    >
       <div className="max-w-5xl mx-auto flex items-center justify-between px-4 py-3">
         <div className="flex items-center gap-3 pr-4">
           <Link href="/" className="flex items-center gap-2 no-underline">

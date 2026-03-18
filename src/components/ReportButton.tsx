@@ -75,8 +75,22 @@ export default function ReportButton({
         {label}
       </button>
       {open && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40">
-          <div className="bg-white border border-black p-6 max-w-md w-full mx-4 max-h-[90vh] overflow-y-auto">
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 md:items-center md:justify-center">
+          <div
+            className="bg-white border border-black p-6 max-w-md w-full mx-4 max-h-[90vh] overflow-y-auto md:relative"
+            style={{
+              paddingTop: "calc(16px + env(safe-area-inset-top, 0px))",
+              paddingBottom: "calc(16px + env(safe-area-inset-bottom, 0px))",
+            }}
+          >
+            <button
+              type="button"
+              onClick={() => setOpen(false)}
+              className="absolute top-2 right-2 w-11 h-11 flex items-center justify-center border border-black font-mono text-sm md:w-8 md:h-8"
+              aria-label="Close report modal"
+            >
+              ✕
+            </button>
             <h2 className="font-pixel text-sm mb-2">REPORT AN ISSUE</h2>
             <p className="font-mono text-xs mb-1">
               <span className="font-bold">Reporting</span>: {contentName}

@@ -107,14 +107,12 @@ const terms = [
 
 export default function DictionaryPage() {
   const alphabet = "ABCDEFGHIJKLMNOPQRSTUVWXYZ".split("");
-  const [activeLetter, setActiveLetter] = useState<string | null>(null);
   const [search, setSearch] = useState("");
 
   const visibleTerms = useMemo(() => {
     const q = search.trim().toLowerCase();
     return terms
       .filter((t) => {
-        if (activeLetter && t.term[0].toUpperCase() !== activeLetter) return false;
         if (!q) return true;
         return (
           t.term.toLowerCase().includes(q) ||
@@ -122,10 +120,10 @@ export default function DictionaryPage() {
         );
       })
       .sort((a, b) => a.term.localeCompare(b.term));
-  }, [activeLetter, search]);
+  }, [search]);
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 md:pr-0 pr-8">
       <header className="border-b border-black pb-4">
         <h1 className="font-pixel text-2xl mb-2">DICTIONARY</h1>
         <p className="font-mono text-sm">AI terms explained simply.</p>
@@ -133,12 +131,11 @@ export default function DictionaryPage() {
 
       {/* Filters + results layout */}
       <section className="flex flex-col md:flex-row md:items-start gap-4">
-        {/* Letter filter column (left) */}
-        <div className="md:w-32 md:border-r md:border-black pr-2 md:pr-4 mb-2 md:mb-0">
+        {/* Letter filter column (left on desktop) */}
+        <div className="hidden md:block md:w-32 md:border-r md:border-black pr-2 md:pr-4 mb-2 md:mb-0">
           <p className="font-mono text-[11px] mb-2">Letters</p>
           <div className="flex md:flex-col flex-wrap gap-1">
             {alphabet.map((letter) => {
-              const isActive = activeLetter === letter;
               const hasAny = terms.some(
                 (t) => t.term[0].toUpperCase() === letter,
               );
@@ -158,20 +155,49 @@ export default function DictionaryPage() {
                 <button
                   key={letter}
                   type="button"
-                  onClick={() =>
-                    setActiveLetter((prev) => (prev === letter ? null : letter))
-                  }
-                  className={`font-mono text-sm px-1 text-left ${
-                    isActive
-                      ? "font-bold underline"
-                      : "hover:underline"
-                  }`}
+                  onClick={() => {
+                    const el = document.getElementById(`letter-${letter}`);
+                    el?.scrollIntoView({ behavior: "smooth", block: "start" });
+                  }}
+                  className="font-mono text-sm px-1 text-left hover:underline"
                 >
                   {letter}
                 </button>
               );
             })}
           </div>
+        </div>
+
+        {/* Mobile side scrubber (A–Z) */}
+        <div className="md:hidden fixed right-2 top-1/2 -translate-y-1/2 z-20 flex flex-col items-center gap-1">
+          {alphabet.map((letter) => {
+            const hasAny = terms.some(
+              (t) => t.term[0].toUpperCase() === letter,
+            );
+            if (!hasAny) {
+              return (
+                <span
+                  key={letter}
+                  className="font-mono text-[10px] text-gray-300"
+                >
+                  {letter}
+                </span>
+              );
+            }
+            return (
+              <button
+                key={letter}
+                type="button"
+                className="font-mono text-[10px] leading-none"
+                onClick={() => {
+                  const el = document.getElementById(`letter-${letter}`);
+                  el?.scrollIntoView({ behavior: "smooth", block: "start" });
+                }}
+              >
+                {letter}
+              </button>
+            );
+          })}
         </div>
 
         {/* Search + list (right) */}
@@ -192,9 +218,12 @@ export default function DictionaryPage() {
             </p>
           ) : (
             <div className="space-y-3">
-              {visibleTerms.map(({ term, definition, related }) => (
+              {visibleTerms.map(({ term, definition, related }) => {
+                const letterId = term[0]?.toUpperCase() || "";
+                return (
                 <article
                   key={term}
+                  id={letterId ? `letter-${letterId}` : undefined}
                   className="font-mono text-sm border-b border-black pb-2"
                 >
                   <h2 className="font-bold text-sm mb-1">{term}</h2>
@@ -205,7 +234,7 @@ export default function DictionaryPage() {
                     </p>
                   )}
                 </article>
-              ))}
+              })}
             </div>
           )}
         </div>

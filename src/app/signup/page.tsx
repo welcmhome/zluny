@@ -59,7 +59,7 @@ export default function SignupPage() {
 
       <form
         onSubmit={handleSubmit}
-        className="space-y-4 font-mono text-xs"
+        className="space-y-4 font-mono text-sm"
         autoComplete="off"
       >
         <div className="space-y-1">
@@ -69,7 +69,7 @@ export default function SignupPage() {
           <input
             id="username"
             type="text"
-            className="w-full border border-black px-2 py-1 bg-white text-black"
+            className="w-full border border-black px-2 py-2 bg-white text-black text-base"
             value={username}
             onChange={(e) => setUsername(e.target.value)}
             required
@@ -83,7 +83,7 @@ export default function SignupPage() {
           <input
             id="email"
             type="email"
-            className="w-full border border-black px-2 py-1 bg-white text-black"
+            className="w-full border border-black px-2 py-2 bg-white text-black text-base"
             value={email}
             onChange={(e) => setEmail(e.target.value)}
             required
@@ -97,7 +97,7 @@ export default function SignupPage() {
           <input
             id="password"
             type="password"
-            className="w-full border border-black px-2 py-1 bg-white text-black"
+            className="w-full border border-black px-2 py-2 bg-white text-black text-base"
             value={password}
             onChange={(e) => setPassword(e.target.value)}
             required
@@ -115,7 +115,7 @@ export default function SignupPage() {
         </button>
       </form>
 
-      <p className="font-mono text-xs">
+      <p className="font-mono text-sm">
         Already have an account?{" "}
         <Link href="/login" className="underline">
           Login

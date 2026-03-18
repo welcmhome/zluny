@@ -4,6 +4,13 @@
 
 @import url("https://fonts.googleapis.com/css2?family=Press+Start+2P&family=Space+Mono:wght@400;700&display=swap");
 
+:root {
+  --sat: env(safe-area-inset-top);
+  --sab: env(safe-area-inset-bottom);
+  --sal: env(safe-area-inset-left);
+  --sar: env(safe-area-inset-right);
+}
+
 html,
 body {
   min-height: 100%;
@@ -12,6 +19,7 @@ body {
 body {
   background: #ffffff;
   color: #000000;
+  overflow-x: hidden;
 }
 
 /* Font utility classes matching the pixel / mono design (use Next.js font vars) */

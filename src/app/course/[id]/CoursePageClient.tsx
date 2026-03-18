@@ -66,6 +66,7 @@ export default function CoursePageClient({
   const [audioProgress, setAudioProgress] = useState(0);
   const [audioChunkIndex, setAudioChunkIndex] = useState(0);
   const chunksRef = useState<string[]>([])[0];
+  const [showMobileToc, setShowMobileToc] = useState(false);
 
   // The first two parsed sections are intro / table of contents.
   // Drop them entirely so the course starts at the real Section 1.
@@ -365,6 +366,50 @@ export default function CoursePageClient({
             </ul>
           </aside>
 
+          {/* Mobile table of contents toggle */}
+          <div className="md:hidden mb-3 w-full">
+            <button
+              type="button"
+              onClick={() =>
+                setShowMobileToc((prev: boolean) => !prev)
+              }
+              className="w-full border border-black px-3 py-3 font-pixel text-[11px] flex items-center justify-between"
+            >
+              <span>TABLE OF CONTENTS</span>
+              <span>▼</span>
+            </button>
+            {showMobileToc && (
+              <ul className="mt-2 border border-black font-mono text-xs">
+                {effectiveSections.map((_, i) => (
+                  <li key={i} className="border-b border-black last:border-b-0">
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setCurrentSection(i);
+                        setShowMobileToc(false);
+                      }}
+                      className="w-full text-left px-3 py-2"
+                    >
+                      Section {i + 1}
+                    </button>
+                  </li>
+                ))}
+                <li>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setCurrentSection(totalSections);
+                      setShowMobileToc(false);
+                    }}
+                    className="w-full text-left px-3 py-2"
+                  >
+                    Quiz
+                  </button>
+                </li>
+              </ul>
+            )}
+          </div>
+
           {/* Section reader or quiz */}
           <main className="flex-1 min-w-0 font-mono text-xs">
             <div>
@@ -407,27 +452,27 @@ export default function CoursePageClient({
                                 {q.question_text || "Question"}
                               </p>
                               <div className="flex flex-col gap-1">
-                                {["A", "B", "C", "D"].map((opt) => {
+                          {["A", "B", "C", "D"].map((opt) => {
                                   const optionText =
                                     (q as Record<string, string>)[
                                       `option_${opt.toLowerCase()}`
                                     ] ?? opt;
                                   return (
-                                    <button
-                                      key={opt}
-                                      type="button"
-                                      onClick={() =>
-                                        setQuizAnswers((prev) => ({
-                                          ...prev,
-                                          [q.id]: opt,
-                                        }))
-                                      }
-                                      className={`text-left border border-black px-2 py-1 btn-plain ${
-                                        quizAnswers[q.id] === opt
-                                          ? "bg-black text-white"
-                                          : ""
-                                      }`}
-                                    >
+                              <button
+                                key={opt}
+                                type="button"
+                                onClick={() =>
+                                  setQuizAnswers((prev) => ({
+                                    ...prev,
+                                    [q.id]: opt,
+                                  }))
+                                }
+                                className={`text-left border border-black px-2 py-2 btn-plain w-full min-h-[48px] ${
+                                  quizAnswers[q.id] === opt
+                                    ? "bg-black text-white"
+                                    : ""
+                                }`}
+                              >
                                       {opt}. {optionText}
                                     </button>
                                   );
@@ -468,7 +513,7 @@ export default function CoursePageClient({
                           if (isAudioThisSection && audioPlaying) stopAudio();
                           else playSection(currentSection);
                         }}
-                        className="font-mono text-xs underline"
+                        className="font-mono text-sm underline min-h-[44px]"
                       >
                         {isAudioThisSection && audioPlaying
                           ? "⏹ STOP"
@@ -492,7 +537,7 @@ export default function CoursePageClient({
                   onClick={() =>
                     setCurrentSection((prev) => Math.max(0, prev - 1))
                   }
-                  className="border border-black px-3 py-1 bg-white text-black font-mono text-sm"
+                  className="border border-black px-3 py-2 bg-white text-black font-mono text-sm min-h-[44px]"
                 >
                   Previous
                 </button>
@@ -505,7 +550,7 @@ export default function CoursePageClient({
                       return next;
                     })
                   }
-                  className="border border-black px-3 py-1 bg-black text-white font-mono text-sm"
+                  className="border border-black px-3 py-2 bg-black text-white font-mono text-sm min-h-[44px]"
                 >
                   Next
                 </button>
@@ -525,7 +570,10 @@ export default function CoursePageClient({
       </div>
       {/* Global audio player bar fixed to bottom when listening */}
       {audioSection !== null && audioPlaying && (
-        <div className="fixed inset-x-0 bottom-0 border-t border-black bg-white z-40">
+        <div
+          className="fixed inset-x-0 bottom-0 border-t border-black bg-white z-40"
+          style={{ paddingBottom: "env(safe-area-inset-bottom, 0px)" }}
+        >
           <div className="max-w-5xl mx-auto px-4 py-2 font-mono text-xs space-y-1">
             <div className="flex items-center justify-between gap-2 flex-wrap">
               <span className="font-bold">

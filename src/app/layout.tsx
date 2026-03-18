@@ -46,11 +46,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html
-      lang="en"
-      className={`${pixel.variable} ${mono.variable}`}
-      suppressHydrationWarning
-    >
+    <html lang="en" className={`${pixel.variable} ${mono.variable}`} suppressHydrationWarning>
       <body
         className="min-h-screen bg-white text-black antialiased"
         suppressHydrationWarning
@@ -58,7 +54,10 @@ export default function RootLayout({
         <AuthSessionProvider>
           <div className="min-h-screen flex flex-col">
             <Nav />
-            <main className="flex-1 max-w-5xl mx-auto w-full px-4 pt-8 pb-6 font-mono border-l border-r border-black min-h-[60vh] max-md:border-l-0 max-md:border-r-0">
+            <main
+              className="flex-1 max-w-5xl mx-auto w-full px-4 pb-6 font-mono border-l border-r border-black min-h-[60vh] max-md:border-l-0 max-md:border-r-0"
+              style={{ paddingTop: "calc(env(safe-area-inset-top, 0px) + 24px)" }}
+            >
               {children}
             </main>
             <footer className="border-t border-black mt-8 py-4 flex justify-center">

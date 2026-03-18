@@ -94,14 +94,20 @@ export default function SettingsLikedSection({ initialLiked }: Props) {
       )}
 
       {modalOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40">
-          <div className="bg-white border border-black p-6 max-w-lg w-full mx-4 max-h-[80vh] flex flex-col">
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 md:items-center md:justify-center">
+          <div
+            className="bg-white border border-black p-6 max-w-lg w-full mx-4 max-h-[80vh] flex flex-col"
+            style={{
+              paddingTop: "calc(16px + env(safe-area-inset-top, 0px))",
+              paddingBottom: "calc(16px + env(safe-area-inset-bottom, 0px))",
+            }}
+          >
             <div className="flex justify-between items-center mb-4">
               <h3 className="font-pixel text-sm">ALL LIKED COURSES</h3>
               <button
                 type="button"
                 onClick={() => setModalOpen(false)}
-                className="font-mono text-xs border border-black px-2 py-1 btn-plain"
+                className="font-mono text-xs border border-black px-2 py-1 btn-plain w-11 h-11 flex items-center justify-center md:w-auto md:h-auto"
               >
                 CLOSE
               </button>
