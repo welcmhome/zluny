@@ -60,7 +60,7 @@ export default function RootLayout({
             >
               {children}
             </main>
-            <footer className="border-t border-black mt-8 py-4 flex justify-center">
+            <footer className="border-t border-black mt-8 py-4 flex justify-center max-md:border-t-0">
               <p className="font-mono text-[11px] text-center text-gray-400">
                 Copyright 2026{" "}
                 <a

@@ -358,11 +358,11 @@ export default function CoursePageClient({
           <span className="shrink-0 hidden md:inline">PROGRESS</span>
           {/* Mobile: same square blocks, centered + scrollable; no PROGRESS word; only SECTION X OF Y (no %) */}
           <div className="w-full md:hidden flex flex-col items-center gap-1">
-            <div className="flex gap-[2px] overflow-x-auto py-1 px-2 max-w-full justify-center">
+            <div className="flex gap-[2px] overflow-x-auto py-1 px-0 w-full justify-between">
               {Array.from({ length: totalNavSections }, (_, i) => (
                 <div
                   key={i}
-                  className={`w-5 h-4 border border-black shrink-0 ${
+                  className={`w-7 h-5 border border-black shrink-0 ${
                     i <= currentSection
                       ? "bg-black"
                       : "bg-white bg-[repeating-linear-gradient(45deg,#ffffff_0,#ffffff_2px,#e5e5e5_2px,#e5e5e5_4px)]"
@@ -525,7 +525,7 @@ export default function CoursePageClient({
               </div>
 
               {/* Content: reader for sections 1–N, quiz only for section N+1 */}
-              <div className="p-3 space-y-3">
+              <div className="max-md:px-0 max-md:py-3 md:p-3 space-y-3">
                 {isQuizSection ? (
                   /* Quiz section: no lesson content here */
                   totalSections >= 0 && (
@@ -697,7 +697,7 @@ export default function CoursePageClient({
                         )}
                       </div>
 
-                      <div className="course-lesson-body font-mono text-sm prose prose-sm max-w-none">
+                      <div className="course-lesson-body font-mono text-sm prose prose-sm max-w-none max-md:text-[15px] max-md:prose-base">
                         <ReactMarkdown>{section.body}</ReactMarkdown>
                       </div>
                     </>
@@ -707,14 +707,14 @@ export default function CoursePageClient({
             </div>
 
             {/* Bottom-right Previous/Next and report link */}
-            <div className="mt-4 flex flex-col items-end gap-2">
-              <div className="flex gap-2">
+            <div className="mt-4 flex flex-col items-end gap-2 max-md:items-stretch">
+              <div className="flex gap-2 w-full">
                 <button
                   type="button"
                   onClick={() =>
                     setCurrentSection((prev) => Math.max(0, prev - 1))
                   }
-                  className="border border-black px-3 py-2 bg-white text-black font-mono text-sm min-h-[44px]"
+                  className="border border-black px-3 py-2 bg-white text-black font-mono text-sm min-h-[44px] max-md:flex-1"
                 >
                   Previous
                 </button>
@@ -727,12 +727,12 @@ export default function CoursePageClient({
                       return next;
                     })
                   }
-                  className="border border-black px-3 py-2 bg-black text-white font-mono text-sm min-h-[44px]"
+                  className="border border-black px-3 py-2 bg-black text-white font-mono text-sm min-h-[44px] max-md:flex-1"
                 >
                   Next
                 </button>
               </div>
-              <div className="font-mono text-xs text-gray-500">
+              <div className="font-mono text-xs text-gray-500 max-md:w-full max-md:text-left">
                 Is something wrong?{" "}
                 <ReportButton
                   contentType="course"
@@ -751,7 +751,7 @@ export default function CoursePageClient({
           className="fixed inset-x-0 bottom-0 border-t border-black bg-white z-40"
           style={{ paddingBottom: "env(safe-area-inset-bottom, 0px)" }}
         >
-          <div className="max-w-5xl mx-auto px-4 py-2 font-mono text-xs space-y-1">
+          <div className="max-w-5xl mx-auto px-4 py-2 font-mono text-xs space-y-1 max-md:px-8">
             <div className="flex items-center justify-between gap-2 flex-wrap">
               <span className="font-bold">
                 Playing: Section {audioSection + 1}
