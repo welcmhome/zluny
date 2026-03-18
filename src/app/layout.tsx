@@ -19,9 +19,25 @@ const mono = Space_Mono({
 export const metadata = {
   title: "ZLUNY",
   description: "AI for all.",
+  manifest: "/manifest.json",
+  themeColor: "#000000",
   icons: {
     icon: "/zluny_caterpillar_transparent.png",
+    apple: "/PHONE_ICONE_ZLUNY.png",
   },
+  appleWebApp: {
+    capable: true,
+    statusBarStyle: "black-translucent",
+    title: "ZLUNY",
+  },
+};
+
+export const viewport = {
+  width: "device-width",
+  initialScale: 1,
+  maximumScale: 1,
+  userScalable: false,
+  viewportFit: "cover",
 };
 
 export default function RootLayout({
