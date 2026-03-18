@@ -303,8 +303,8 @@ export default async function HomePage({
 
   // Logged-in: dashboard view
   const username =
-    (session.user?.name as string | null) ??
-    (session.user?.email as string | null) ??
+    (session?.user?.name as string | null) ??
+    (session?.user?.email as string | null) ??
     "User";
   const today = new Date().toLocaleDateString();
 
