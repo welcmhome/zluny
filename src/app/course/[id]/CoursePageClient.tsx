@@ -65,7 +65,6 @@ export default function CoursePageClient({
   const [audioSpeed, setAudioSpeed] = useState(1);
   const [audioProgress, setAudioProgress] = useState(0);
   const [audioChunkIndex, setAudioChunkIndex] = useState(0);
-  const chunksRef = useState<string[]>([])[0];
   const [isPlaying, setIsPlaying] = useState(false);
   const [isPaused, setIsPaused] = useState(false);
   const [elapsed, setElapsed] = useState(0);
@@ -805,16 +804,39 @@ export default function CoursePageClient({
               onClick={(e) => {
                 if (
                   audioSection === null ||
-                  chunksRef.length === 0 ||
+                  wordsArray.length === 0 ||
+                  estimatedSeconds <= 0 ||
                   typeof window === "undefined"
                 ) {
                   return;
                 }
-                const rect = (e.currentTarget as HTMLDivElement).getBoundingClientRect();
-                const clickX = e.clientX - rect.left;
-                const ratio = Math.min(Math.max(clickX / rect.width, 0), 1);
-                const targetChunk = Math.floor(ratio * chunksRef.length);
-                playSectionFromChunk(audioSection, targetChunk);
+                const rect = e.currentTarget.getBoundingClientRect();
+                const pct = Math.min(Math.max((e.clientX - rect.left) / rect.width, 0), 1);
+                const newTime = pct * estimatedSeconds;
+                const wordIndex = Math.max(
+                  0,
+                  Math.min(
+                    wordsArray.length - 1,
+                    Math.floor(pct * wordsArray.length)
+                  ),
+                );
+                const remainingText = wordsArray.slice(wordIndex).join(" ");
+                window.speechSynthesis.cancel();
+                clearIntervalTimer();
+                const u = new SpeechSynthesisUtterance(remainingText);
+                u.rate = playbackRate;
+                u.onend = () => {
+                  setIsPlaying(false);
+                  setIsPaused(false);
+                  setElapsed(estimatedSeconds);
+                  clearIntervalTimer();
+                };
+                utteranceRef.current = u;
+                window.speechSynthesis.speak(u);
+                setElapsed(newTime);
+                setIsPlaying(true);
+                setIsPaused(false);
+                startIntervalTimer(estimatedSeconds);
               }}
             >
               <div
