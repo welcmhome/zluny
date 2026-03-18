@@ -278,7 +278,7 @@ export default function CoursePageClient({
                   className={`w-5 h-4 border border-black shrink-0 ${
                     i <= currentSection
                       ? "bg-black"
-                      : "bg-white bg-[repeating-linear-gradient(45deg,#ffffff_0,#ffffff_2px,#e5e5e5_2px,#e5e5e5_4px)]`
+                      : "bg-white bg-[repeating-linear-gradient(45deg,#ffffff_0,#ffffff_2px,#e5e5e5_2px,#e5e5e5_4px)]"
                   }`}
                 />
               ))}
@@ -296,7 +296,7 @@ export default function CoursePageClient({
                   className={`w-7 h-5 border border-black shrink-0 ${
                     i <= currentSection
                       ? "bg-black"
-                      : "bg-white bg-[repeating-linear-gradient(45deg,#ffffff_0,#ffffff_2px,#e5e5e5_2px,#e5e5e5_4px)]`
+                      : "bg-white bg-[repeating-linear-gradient(45deg,#ffffff_0,#ffffff_2px,#e5e5e5_2px,#e5e5e5_4px)]"
                   }`}
                 />
               ))}
