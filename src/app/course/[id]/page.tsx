@@ -1,6 +1,6 @@
 import { redirect, notFound } from "next/navigation";
 import { db } from "@/lib/db";
-import { auth } from "@/app/api/auth/[...nextauth]/route";
+import { auth } from "@/auth";
 import CoursePageClient from "./CoursePageClient";
 
 const CATEGORY_CLASS: Record<string, string> = {

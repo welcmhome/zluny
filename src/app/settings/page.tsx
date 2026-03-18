@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { redirect } from "next/navigation";
 import { db } from "@/lib/db";
-import { auth } from "@/app/api/auth/[...nextauth]/route";
+import { auth } from "@/auth";
 import SettingsLikedSection from "@/components/SettingsLikedSection";
 import SettingsPasswordForm from "@/components/SettingsPasswordForm";
 import SettingsDangerZone from "@/components/SettingsDangerZone";

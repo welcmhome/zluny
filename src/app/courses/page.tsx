@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { db } from "@/lib/db";
-import { auth } from "@/app/api/auth/[...nextauth]/route";
+import { auth } from "@/auth";
 import CourseCardIcons from "@/components/CourseCardIcons";
 
 const CATEGORIES = [
