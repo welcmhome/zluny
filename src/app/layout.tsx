@@ -56,7 +56,7 @@ export default function RootLayout({
             <Nav />
             <main
               className="flex-1 max-w-5xl mx-auto w-full px-4 pb-6 font-mono border-l border-r border-black min-h-[60vh] max-md:border-l-0 max-md:border-r-0"
-              style={{ paddingTop: "calc(env(safe-area-inset-top, 0px) + 24px)" }}
+              style={{ paddingTop: "24px" }}
             >
               {children}
             </main>
