@@ -351,8 +351,8 @@ export default function CoursePageClient({
         </div>
       </header>
 
-      {/* Main lesson area */}
-      <div className="bg-white p-4 space-y-4">
+      {/* Main lesson area: same horizontal padding as Home (layout px-4 only on mobile) */}
+      <div className="bg-white p-4 max-md:px-0 space-y-4">
         {/* Progress row: square block bar on all screens; no "PROGRESS" on mobile; one label on mobile (section count only) */}
         <div className="font-mono text-xs flex flex-wrap items-center justify-between gap-2 sm:gap-4 border-b border-black pb-2">
           <span className="shrink-0 hidden md:inline">PROGRESS</span>
@@ -500,7 +500,7 @@ export default function CoursePageClient({
           <main className="flex-1 min-w-0 font-mono text-xs">
             <div>
               {/* Header bar: section title or Quiz + like/save */}
-              <div className="flex items-center justify-between border-b border-black px-3 py-2 gap-2">
+              <div className="flex items-center justify-between border-b border-black px-3 py-2 gap-2 max-md:px-0">
                 <div className="font-mono text-xs font-bold">
                   {isQuizSection ? "Quiz" : (section?.title ?? courseTitle)}
                 </div>
@@ -593,8 +593,8 @@ export default function CoursePageClient({
                 ) : (
                   section && (
                     <>
-                      {/* Audio player */}
-                      <div className="w-full max-w-lg mb-4">
+                      {/* Audio player: full width on mobile to match TOC/body */}
+                      <div className="w-full max-w-lg max-md:max-w-none mb-4">
                         {!isPlaying && elapsed === 0 ? (
                           <button
                             type="button"
@@ -732,13 +732,14 @@ export default function CoursePageClient({
                   Next
                 </button>
               </div>
-              <div className="font-mono text-xs text-gray-500 max-md:w-full max-md:text-left">
+              <div className="font-mono text-xs text-gray-500 max-md:w-full max-md:text-right mt-2">
                 Is something wrong?{" "}
                 <ReportButton
                   contentType="course"
                   contentId={courseId}
                   contentName={courseTitle}
                   label="Report"
+                  underline
                 />
               </div>
             </div>
@@ -751,7 +752,7 @@ export default function CoursePageClient({
           className="fixed inset-x-0 bottom-0 border-t border-black bg-white z-40"
           style={{ paddingBottom: "env(safe-area-inset-bottom, 0px)" }}
         >
-          <div className="max-w-5xl mx-auto px-4 py-2 font-mono text-xs space-y-1 max-md:px-8">
+          <div className="max-w-5xl mx-auto px-4 py-2 font-mono text-xs space-y-1">
             <div className="flex items-center justify-between gap-2 flex-wrap">
               <span className="font-bold">
                 Playing: Section {audioSection + 1}

@@ -16,6 +16,7 @@ type Props = {
   contentId: string;
   contentName: string;
   label?: string;
+  underline?: boolean;
 };
 
 const CONTENT_TYPE_LABELS: Record<Props["contentType"], string> = {
@@ -28,6 +29,7 @@ export default function ReportButton({
   contentId,
   contentName,
   label = "Is something wrong? Report",
+  underline = false,
 }: Props) {
   const [open, setOpen] = useState(false);
   const [selectedType, setSelectedType] = useState<string | null>(null);
@@ -70,7 +72,7 @@ export default function ReportButton({
       <button
         type="button"
         onClick={() => setOpen(true)}
-        className="font-mono text-xs text-gray-500 hover:underline"
+        className={`font-mono text-xs text-gray-500 hover:underline ${underline ? "underline" : ""}`}
       >
         {label}
       </button>
