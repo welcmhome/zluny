@@ -1,6 +1,7 @@
 import "./globals.css";
 import React from "react";
 import Nav from "@/components/Nav";
+import SplashScreen from "@/components/SplashScreen";
 import AuthSessionProvider from "@/components/AuthSessionProvider";
 import { Press_Start_2P, Space_Mono } from "next/font/google";
 
@@ -53,6 +54,7 @@ export default function RootLayout({
       >
         <AuthSessionProvider>
           <div className="min-h-screen flex flex-col">
+            <SplashScreen />
             <Nav />
             <main
               className="flex-1 max-w-5xl mx-auto w-full px-4 pb-6 font-mono border-l border-r border-black min-h-[60vh] max-md:border-l-0 max-md:border-r-0"
