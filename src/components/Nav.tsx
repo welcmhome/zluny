@@ -228,7 +228,7 @@ export default function Nav() {
         <div className="md:hidden flex items-center gap-2">
           {session ? (
             <>
-              <Link href="/settings" className="font-mono text-[10px]">
+              <Link href="/settings" className="font-mono text-[10px] font-bold">
                 {username ?? ""}
               </Link>
               <button
