@@ -3,7 +3,7 @@
 import Image from "next/image";
 import { useLayoutEffect, useRef, useState } from "react";
 
-const SPLASH_MS = 1400;
+const SPLASH_MS = 2600;
 
 function isStandalonePwa(): boolean {
   if (typeof window === "undefined") return false;
@@ -20,11 +20,22 @@ export default function MobileAppSplash() {
   useLayoutEffect(() => {
     if (!isStandalonePwa()) return;
 
+    const html = document.documentElement;
+    const body = document.body;
+    html.style.backgroundColor = "#000000";
+    body.style.backgroundColor = "#000000";
+
     setVisible(true);
-    timerRef.current = setTimeout(() => setVisible(false), SPLASH_MS);
+    timerRef.current = setTimeout(() => {
+      setVisible(false);
+      html.style.backgroundColor = "";
+      body.style.backgroundColor = "";
+    }, SPLASH_MS);
 
     return () => {
       if (timerRef.current) clearTimeout(timerRef.current);
+      html.style.backgroundColor = "";
+      body.style.backgroundColor = "";
     };
   }, []);
 
@@ -41,13 +52,13 @@ export default function MobileAppSplash() {
       }}
       aria-hidden
     >
-      <div className="relative h-44 w-44 max-w-[70vw]">
+      <div className="relative h-[229px] w-[229px] max-w-[91vw]">
         <Image
           src="/MOBILE_APP_PLASH.png"
           alt=""
           fill
           className="object-contain"
-          sizes="176px"
+          sizes="229px"
           priority
         />
       </div>

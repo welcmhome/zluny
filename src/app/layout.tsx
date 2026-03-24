@@ -1,5 +1,6 @@
 import "./globals.css";
 import React from "react";
+import Script from "next/script";
 import Nav from "@/components/Nav";
 import MobileAppSplash from "@/components/MobileAppSplash";
 import AuthSessionProvider from "@/components/AuthSessionProvider";
@@ -52,6 +53,9 @@ export default function RootLayout({
         className="min-h-screen bg-white text-black antialiased"
         suppressHydrationWarning
       >
+        <Script id="pwa-splash-bg" strategy="beforeInteractive">
+          {`(function(){try{var m=window.matchMedia("(display-mode: standalone)");var s=m&&m.matches;var i=window.navigator.standalone===true;if(s||i){document.documentElement.style.background="#000000";document.body.style.background="#000000";}}catch(e){}})();`}
+        </Script>
         <AuthSessionProvider>
           <div className="min-h-screen flex flex-col">
             <MobileAppSplash />
